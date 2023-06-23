@@ -1,10 +1,11 @@
 from django.shortcuts import render, get_object_or_404
 from rest_framework.response import Response
-from rest_framework import status, generics
+from rest_framework import status, generics, viewsets
 from .models import BookItem, Category
 from .serializers import BookItemSerializer #, CategorySerializer
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
+from django.core.paginator import Paginator, EmptyPage
 
 # Create your views here.
 '''
@@ -41,12 +42,24 @@ def BookList(request):
         category_name = request.query_params.get('category')
         to_price = request.query_params.get('to_price')
         search = request.query_params.get('search')
+        ordering = request.query_params.get('ordering')
+        perpage = request.query_params.get('perpage', default = 2)
+        page = request.query_params.get('page',default=1)
         if category_name:
             items = items.filter(category__title = category_name)
         if to_price:
             items = items.filter(price = to_price)
         if search:
             items = items.filter(title__istartswith = search)
+        if ordering:
+            #items = items.order_by(ordering) Single ordering parameter
+            ordering_fields = ordering.split(",")  #Multiple ordering parameters
+            items = items.order_by(ordering_fields)
+        paginator = Paginator(items, per_page=perpage)
+        try:
+            items = paginator.page(number=page)
+        except EmptyPage:
+            items = []
         serialized_item = BookItemSerializer(items,many=True)
         return Response(serialized_item.data)
     if request.method == "POST":
@@ -65,3 +78,10 @@ def SingleBook(request, id):
 class CreateCategory(generics.ListCreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer'''
+    
+#Easier way of settling everything upto pagination using built in classes
+class BookItemsViewSet(viewsets.ModelViewSet):
+    queryset = BookItem.objects.all()   
+    serializer_class = BookItemSerializer
+    ordering_fields = ['price','inventory']
+    search_fields = ['title', 'Category_title']
