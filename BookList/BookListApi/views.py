@@ -7,6 +7,8 @@ from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from django.core.paginator import Paginator, EmptyPage
 
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import permission_classes
 # Create your views here.
 '''
 @api_view()
@@ -73,6 +75,11 @@ def SingleBook(request, id):
     item = get_object_or_404(BookItem, pk=id)
     serialized_item = BookItemSerializer(item)
     return Response(serialized_item.data)
+
+@api_view()
+@permission_classes({IsAuthenticated})
+def secret(request):
+    return Response({'message' : 'some secret message'})
 
 ''' Comment - 1 #Ref - serializers.py file
 class CreateCategory(generics.ListCreateAPIView):
