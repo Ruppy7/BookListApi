@@ -9,6 +9,8 @@ from django.core.paginator import Paginator, EmptyPage
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
+from rest_framework.decorators import throttle_classes
 # Create your views here.
 '''
 @api_view()
@@ -77,10 +79,20 @@ def SingleBook(request, id):
     return Response(serialized_item.data)
 
 @api_view()
-@permission_classes({IsAuthenticated})
+@permission_classes(IsAuthenticated)
 def secret(request):
     return Response({'message' : 'some secret message'})
 
+@api_view()
+@throttle_classes([AnonRateThrottle])
+def throttle(request):
+    return Response({"message":"successful"})
+
+@api_view()
+@permission_classes([IsAuthenticated])
+@throttle_classes([UserRateThrottle])
+def throttle_auth(request):
+    return Response({'message':'authenticated users page'})
 ''' Comment - 1 #Ref - serializers.py file
 class CreateCategory(generics.ListCreateAPIView):
     queryset = Category.objects.all()
