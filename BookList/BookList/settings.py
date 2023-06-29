@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'BookListApi',
     #'debug_toolbar',
     'rest_framework.authtoken',
+    'djoser',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -144,10 +146,16 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES':(
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_THROTTLE_RATES':{
         'anon':'2/minute',
         'user':'5/minute',
     }
+}
+
+DJOSER = {
+    "USER_ID_FIELD" : "username"
 }
